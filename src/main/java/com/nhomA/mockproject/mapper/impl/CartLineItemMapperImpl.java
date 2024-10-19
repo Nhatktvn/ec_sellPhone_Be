@@ -19,7 +19,8 @@ public class CartLineItemMapperImpl implements CartLineItemMapper {
         responseDTO.setAddedDate(cartLineItem.getAddedDate());
         responseDTO.setDeleted(cartLineItem.isDeleted());
         responseDTO.setQuantity(cartLineItem.getQuantity());
-        responseDTO.setUnitPrice(cartLineItem.getUnitPrice());
+        responseDTO.setSellPrice(cartLineItem.getSellPrice());
+        responseDTO.setOriginalPrice(cartLineItem.getOriginalPrice());
         responseDTO.setName(cartLineItem.getProduct().getName());
         responseDTO.setUrlImage(cartLineItem.getProduct().getImageThumb());
         responseDTO.setColor(cartLineItem.getColor());

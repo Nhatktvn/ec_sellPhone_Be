@@ -7,7 +7,8 @@ public class CartLineItemResponseDTO {
     private Long cartId;
     private Long productId;
     private int quantity;
-    private double unitPrice;
+    private double originalPrice;
+    private double sellPrice;
     private String color;
     private String storageCapacity;
     private ZonedDateTime addedDate;
@@ -101,12 +102,20 @@ public class CartLineItemResponseDTO {
         this.quantity = quantity;
     }
 
-    public double getUnitPrice() {
-        return unitPrice;
+    public double getOriginalPrice() {
+        return originalPrice;
     }
 
-    public void setUnitPrice(double unitPrice) {
-        this.unitPrice = unitPrice;
+    public void setOriginalPrice(double originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+
+    public double getSellPrice() {
+        return sellPrice;
+    }
+
+    public void setSellPrice(double sellPrice) {
+        this.sellPrice = sellPrice;
     }
 
     public ZonedDateTime getAddedDate() {

@@ -1,9 +1,10 @@
 package com.nhomA.mockproject.service.impl;
 
 import com.nhomA.mockproject.dto.CategoryDTO;
-import com.nhomA.mockproject.dto.UserDTO;
+import com.nhomA.mockproject.entity.Brand;
 import com.nhomA.mockproject.entity.Category;
 import com.nhomA.mockproject.entity.User;
+import com.nhomA.mockproject.exception.BrandNotFoundException;
 import com.nhomA.mockproject.exception.CategoryNotFoundException;
 import com.nhomA.mockproject.mapper.CategoryMapper;
 import com.nhomA.mockproject.repository.CategoryRepository;
@@ -21,31 +22,26 @@ import java.util.Optional;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
-    private final UserRepository userRepository;
-    private final CategoryMapper categoryMapper;
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
-    public CategoryServiceImpl(UserRepository userRepository, CategoryMapper categoryMapper, CategoryRepository categoryRepository) {
-        this.userRepository = userRepository;
-        this.categoryMapper = categoryMapper;
+    private final UserRepository userRepository;
+
+    public CategoryServiceImpl(CategoryRepository categoryRepository, CategoryMapper categoryMapper, UserRepository userRepository) {
         this.categoryRepository = categoryRepository;
+        this.categoryMapper = categoryMapper;
+        this.userRepository = userRepository;
     }
+
+
     @Transactional
     @Override
     public CategoryDTO getCategoryById(Long id) {
         Optional<Category> category = categoryRepository.findById(id);
-        if(category.isEmpty()) {
-            throw new CategoryNotFoundException("Category not found!") ;
+        if (category.isEmpty()){
+            throw new CategoryNotFoundException("Category not found");
         }
         return categoryMapper.toDTO(category.get());
-    }
-
-    @Transactional
-    @Override
-    public List<CategoryDTO> getCategories() {
-        List<Category> categories = categoryRepository.findAll();
-        List<CategoryDTO> categoryDTOS = categoryMapper.toDTOs(categories);
-        return categoryDTOS;
     }
 
     @Transactional
@@ -63,14 +59,10 @@ public class CategoryServiceImpl implements CategoryService {
         Optional<User> existedUser = userRepository.findByUsername(username);
         User user = existedUser.get();
         Category category = categoryMapper.toEntity(categoryDTO);
-        category.setUserCreated(user);
-        category.setUserUpdated(user);
-        category.setCreatedDate(ZonedDateTime.now());
-        category.setUpdatedDate(ZonedDateTime.now());
         categoryRepository.save(category);
         return categoryDTO;
     }
-    @Transactional
+
     @Override
     public CategoryDTO updateCategoryById(String username, Long id, CategoryDTO categoryDTO) {
         Optional<User> existedUser = userRepository.findByUsername(username);
@@ -82,18 +74,20 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = existedCategory.get();
         category.setName(categoryDTO.getName());
         category.setDescription(categoryDTO.getDescription());
-        if(categoryDTO.getUrlImage() != ""){
-            category.setUrlImage(categoryDTO.getUrlImage());
-        }
-        category.setUserUpdated(userUpdated);
-        category.setUpdatedDate(ZonedDateTime.now());
         categoryRepository.save(category);
-    return categoryDTO;
+        return categoryDTO;
     }
-    @Transactional
+
     @Override
     public Boolean deleteCategoryById(Long id) {
         categoryRepository.deleteById(id);
         return true;
+    }
+
+    @Override
+    public List<CategoryDTO> getCategories() {
+        List<Category> categories = categoryRepository.findAll();
+        List<CategoryDTO> categoryDTOS = categoryMapper.toDTOs(categories);
+        return categoryDTOS;
     }
 }

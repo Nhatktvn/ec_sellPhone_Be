@@ -69,14 +69,15 @@ public class OrderServiceImpl implements OrderService {
 //        }
 //        Address address = existedAddress.get();
         Order order = new Order();
-        order.setAddress(orderRequestDTO.getAddress());
+        String infoAddress = orderRequestDTO.getProvinceAddress() + ", " + orderRequestDTO.getDistrictAddress() + ", " + orderRequestDTO.getWardAddress() + ", " + orderRequestDTO.getStreetAddress();
+        order.setAddress(infoAddress);
         order.setName(orderRequestDTO.getName());
         order.setPhoneNumber(orderRequestDTO.getPhone());
         order.setDeliveryTime(ZonedDateTime.now());
         order.setCartLineItems(cartLineItems);
         double totalPriceOrder = 0;
         for (CartLineItem c: cartLineItems){
-            totalPriceOrder += c.getUnitPrice() * c.getQuantity();
+            totalPriceOrder += c.getSellPrice() * c.getQuantity();
         }
         order.setTotalPrice(totalPriceOrder);
         for (CartLineItem c: cartLineItems){
@@ -130,7 +131,7 @@ public class OrderServiceImpl implements OrderService {
 
         double totalPriceOrder = 0;
         for (CartLineItem c: cartLineItems){
-            totalPriceOrder += c.getUnitPrice() * c.getQuantity();
+            totalPriceOrder += c.getSellPrice() * c.getQuantity();
         }
         order.setTotalPrice(totalPriceOrder);
         for (CartLineItem c: cartLineItems){
@@ -177,7 +178,8 @@ public class OrderServiceImpl implements OrderService {
         Pageable pageable= PaginationAndSortingUtils.getPageable(pageNo,pageSize,sortBy,sortDir);
         Page<Order> orders= orderRepository.findAll(pageable);
         List<Order> orderContent = orders.getContent();
-        return orderMapper.toResponseDTOs(orderContent);
+        List<Order> orderList = orderRepository.findAll();
+        return orderMapper.toResponseDTOs(orderList);
     }
 
     @Transactional
@@ -189,12 +191,12 @@ public class OrderServiceImpl implements OrderService {
     }
     @Transactional
     @Override
-    public OrderResponseDTO setStatusOrder(Long orderId, Long statusOrderId) {
+    public OrderResponseDTO setStatusOrder(Long orderId, String statusOrderName) {
         Optional<Order> emptyOrder = orderRepository.findById(orderId);
         if(emptyOrder.isEmpty()){
             throw new OrderNotFoundException("Order not found!");
         }
-        Optional<StatusOrder> emptyStatusOrder = statusOrderRepository.findById(statusOrderId);
+        Optional<StatusOrder> emptyStatusOrder = statusOrderRepository.findByName(statusOrderName);
         if(emptyStatusOrder.isEmpty()){
             throw new StatusOrderNotFoundException("Cart line item not found!");
         }
@@ -209,8 +211,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponseDTO getDetailOrder(String username, Long orderId) {
-
-        return null;
+        Optional<User> existedUser = userRepository.findByUsername(username);
+        Optional<Order> existedOrder = orderRepository.findByIdAndUserId(orderId, existedUser.get().getId());
+        if(existedOrder.isEmpty()){
+            throw new OrderNotFoundException("Order not found!");
+        }
+        Order order = existedOrder.get();
+        return orderMapper.toResponseDTO(order);
     }
 
     @Transactional

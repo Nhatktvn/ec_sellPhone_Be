@@ -1,5 +1,6 @@
 package com.nhomA.mockproject.entity;
 
+import com.paypal.api.payments.Phone;
 import jakarta.persistence.*;
 
 import java.time.ZonedDateTime;
@@ -35,31 +36,50 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<CartLineItem> cartLineItems;
     @ManyToOne
+    @JoinColumn(name = "brand_id", referencedColumnName = "id")
+    private Brand brand;
+
+    @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     private Category category;
 
     @Column(name = "description",length = -1)
     private String description;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Favourite> favourites;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Reviews> reviews;
 
     @OneToMany(mappedBy = "product",cascade = CascadeType.ALL)
     private List<Variant> variants;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "specification_id", referencedColumnName = "id")
-    private Specification specification;
 
-    public Specification getSpecification() {
-        return specification;
+//    @OneToOne(mappedBy = "phoneSpecification", cascade = CascadeType.ALL)
+//    private PhoneSpecification phoneSpecification;
+//    @OneToOne(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "phoneSpecification_id", referencedColumnName = "id")
+//    private PhoneSpecification phoneSpecification;
+//    @OneToOne(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "specification_id", referencedColumnName = "id")
+//    private PhoneSpecification phoneSpecification;
+
+//    public PhoneSpecification getSpecification() {
+//        return phoneSpecification;
+//    }
+//
+//    public void setSpecification(PhoneSpecification phoneSpecification) {
+//        this.phoneSpecification = phoneSpecification;
+//    }
+
+
+    public Category getCategory() {
+        return category;
     }
 
-    public void setSpecification(Specification specification) {
-        this.specification = specification;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public List<ImagesProduct> getImagesProduct() {
@@ -74,8 +94,8 @@ public class Product {
         return variants;
     }
 
-    public void setVariants(List<Variant> variants) {
-        this.variants = variants;
+    public void setVariants(List<Variant> variantOfPhones) {
+        this.variants = variantOfPhones;
     }
 
     public List<Reviews> getReviews() {
@@ -158,14 +178,13 @@ public class Product {
         this.name = name;
     }
 
-    public Category getCategory() {
-        return category;
+    public Brand getBrand() {
+        return brand;
     }
 
-    public void setCategory(Category category) {
-        this.category = category;
+    public void setBrand(Brand brand) {
+        this.brand = brand;
     }
-
 
     public List<CartLineItem> getCartLineItems() {
         return cartLineItems;

@@ -20,16 +20,27 @@ import java.util.*;
 public class VnPayController {
     private final OrderService orderService;
 
+
+    private OrderRequestDTO orderRequestDTO;
+
     public VnPayController(OrderService orderService) {
         this.orderService = orderService;
     }
 
-    @GetMapping("/pay")
-    public String getPay(Authentication authentication ,@RequestParam("address") String address, @RequestParam("name") String name, @RequestParam("phone") String phone,@RequestParam("totalPrice") double totalPrice ) throws UnsupportedEncodingException{
-        OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
-        orderRequestDTO.setAddress(address);
-        orderRequestDTO.setName(name);
-        orderRequestDTO.setPhone(phone);
+    @PostMapping("/pay")
+    public String getPay(Authentication authentication ,@RequestParam("provinceAddress") String provinceAddress,@RequestParam("districtAddress") String districtAddress,
+                         @RequestParam("wardAddress") String wardAddress, @RequestParam("name") String name, @RequestParam("phone") String phone,
+                         @RequestParam("streetAddress") String streetAddress,
+                         @RequestParam("totalPrice") double totalPrice ) throws UnsupportedEncodingException{
+        OrderRequestDTO orderRequestDTO1 = new OrderRequestDTO();
+        orderRequestDTO1.setProvinceAddress(provinceAddress);
+        orderRequestDTO1.setDistrictAddress(districtAddress);
+        orderRequestDTO1.setWardAddress(wardAddress);
+        orderRequestDTO1.setStreetAddress(streetAddress);
+//        orderRequestDTO.setAddress(address);
+        orderRequestDTO1.setName(name);
+        orderRequestDTO1.setPhone(phone);
+        this.orderRequestDTO = orderRequestDTO1;
         String username = authentication.getName();
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
@@ -55,7 +66,7 @@ public class VnPayController {
         vnp_Params.put("vnp_OrderType", orderType);
 
         vnp_Params.put("vnp_Locale", "vn");
-        vnp_Params.put("vnp_ReturnUrl", VnPayConfig.vnp_ReturnUrl + "?infoUsername=" +username + "&infoName=" + URLEncoder.encode(orderRequestDTO.getName()) + "&infoPhone=" +orderRequestDTO.getPhone() + "&infoAddressId=" +orderRequestDTO.getAddress());
+        vnp_Params.put("vnp_ReturnUrl", VnPayConfig.vnp_ReturnUrl + "?infoUsername=" + username);
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
@@ -111,9 +122,14 @@ public class VnPayController {
             String vnp_SecureHash = queryParams.get("vnp_SecureHash");
             String vnp_PayDate = queryParams.get("vnp_PayDate");
             String vnp_TxnRef = queryParams.get("vnp_TxnRef");
-            String infoName = queryParams.get("infoName");
-            String infoPhone = queryParams.get("infoPhone");
-            String infoAddress = queryParams.get("infoAddressId");
+//            String infoName = queryParams.get("infoName");
+//            String infoPhone = queryParams.get("infoPhone");
+////            String infoAddress = queryParams.get("infoAddressId");
+//            String provinceAddress = queryParams.get("infoProvince");
+//            String districtAddress = queryParams.get("infoDistrict");
+//            String wardAddress = queryParams.get("infoWard");
+//            String streetAddress = queryParams.get("infoStreet");
+            String infoAddress = orderRequestDTO.getProvinceAddress() + ", " + orderRequestDTO.getDistrictAddress() + ", " + orderRequestDTO.getWardAddress() + ", " + orderRequestDTO.getStreetAddress();
             if (queryParams.containsKey("vnp_SecureHash"))
             {
                 queryParams.remove("vnp_SecureHash");
@@ -151,21 +167,21 @@ public class VnPayController {
             String hashCode = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hashData.toString());
             if (hashCode.equals(vnp_SecureHash)) {
                 if ("00".equals(queryParams.get("vnp_ResponseCode"))) {
-                    OrderPaymentVnPayDTO orderPaymentVnPayDTO = new OrderPaymentVnPayDTO(infoAddress, infoName, infoPhone, vnp_Amount, vnp_BankCode, vnp_TransactionNo, vnp_OrderInfo, vnp_SecureHash, vnp_PayDate, vnp_TxnRef);
+                    OrderPaymentVnPayDTO orderPaymentVnPayDTO = new OrderPaymentVnPayDTO(infoAddress, orderRequestDTO.getName(), orderRequestDTO.getPhone(), vnp_Amount, vnp_BankCode, vnp_TransactionNo, vnp_OrderInfo, vnp_SecureHash, vnp_PayDate, vnp_TxnRef);
                     orderService.orderPaymentVnPay(username, orderPaymentVnPayDTO);
-                    response.sendRedirect("http://localhost:3000/payment/success");
+                    response.sendRedirect("http://localhost:3000/thanh-toan/thanh-cong");
                 } else {
-                    response.sendRedirect("http://localhost:3000/payment/failed");
+                    response.sendRedirect("http://localhost:3000/thanh-toan/that-bai");
                 }
             }
             else
             {
-                response.sendRedirect("http://localhost:3000/payment/failed");
+                response.sendRedirect("http://localhost:3000/thanh-toan/that-bai");
             }
         }
         catch(Exception e)
         {
-            response.sendRedirect("http://localhost:3000/payment/failed");
+            response.sendRedirect("http://localhost:3000/thanh-toan/that-bai");
         }
     }
 }

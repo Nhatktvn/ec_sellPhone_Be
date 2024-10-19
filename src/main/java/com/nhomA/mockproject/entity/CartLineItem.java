@@ -14,9 +14,10 @@ public class CartLineItem {
     private Long id;
     @Column(name = "quantity", nullable = false)
     private int quantity;
-    @Column(name = "unit_price", nullable = false)
-    private double unitPrice;
-
+    @Column(name = "original_price", nullable = false)
+    private double originalPrice;
+    @Column(name = "sell_price", nullable = false)
+    private double sellPrice;
     @Column(name = "added_date")
     private ZonedDateTime addedDate;
     @Column(name = "color")
@@ -59,12 +60,20 @@ public class CartLineItem {
         this.quantity = quantity;
     }
 
-    public double getUnitPrice() {
-        return unitPrice;
+    public double getOriginalPrice() {
+        return originalPrice;
     }
 
-    public void setUnitPrice(double unitPrice) {
-        this.unitPrice = unitPrice;
+    public void setOriginalPrice(double originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+
+    public double getSellPrice() {
+        return sellPrice;
+    }
+
+    public void setSellPrice(double sellPrice) {
+        this.sellPrice = sellPrice;
     }
 
     public ZonedDateTime getAddedDate() {

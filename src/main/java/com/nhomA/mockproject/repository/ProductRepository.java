@@ -16,6 +16,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findTop5ByNameContainingIgnoreCase(String keyName);
     List<Product> findByNameContainingIgnoreCase(String nameProduct);
 //    List<Product> findByPriceBetween(double minPrice, double maxPrice);
-    Page<Product> findByCategoryId(Long idCategory, Pageable pageable);
-    List<Product> findByCategoryId(Long idCategory);
+    Page<Product> findTop5ByNameContainingIgnoreCase(String keyName, Pageable pageable);
+    Page<Product> findByBrandId(Long idBrand, Pageable pageable);
+    List<Product> findByBrandId(Long idBrand);
 }

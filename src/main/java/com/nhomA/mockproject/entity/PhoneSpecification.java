@@ -1,22 +1,44 @@
-package com.nhomA.mockproject.dto;
+package com.nhomA.mockproject.entity;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 
-public class SpecificationDTO {
+@Entity
+@Table(name = "phone_specification")
+public class PhoneSpecification {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "size_screen")
     private double sizeScreen;
+    @Column(name = "screen_technology")
     private String screenTechnology;
+    @Column(name = "camera_rear")
     private String cameraRear;
+    @Column(name = "camera_front")
     private String cameraFront;
+    @Column(name = "chipset")
     private String chipset;
+    @Column(name = "ram")
     private String ram;
+    @Column(name = "rom")
     private String rom;
+    @Column(name = "battery")
     private int battery;
+    @Column(name = "screen_resolution")
     private String screenResolution;
+    @Column(name = "opera_system")
     private String operaSystem;
-    public SpecificationDTO(){}
+
+    @OneToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
+//    @OneToOne(mappedBy = "phoneSpecification", cascade = CascadeType.ALL)
+//    private Product product;
 
 
-    public SpecificationDTO(double sizeScreen, String screenTechnology, String cameraRear, String cameraFront, String chipset, String ram, String rom, int battery, String screenResolution, String operaSystem) {
+    public PhoneSpecification(Long id, double sizeScreen, String screenTechnology, String cameraRear, String cameraFront, String chipset, String ram, String rom, String operaSystem) {
+        this.id = id;
         this.sizeScreen = sizeScreen;
         this.screenTechnology = screenTechnology;
         this.cameraRear = cameraRear;
@@ -24,9 +46,42 @@ public class SpecificationDTO {
         this.chipset = chipset;
         this.ram = ram;
         this.rom = rom;
-        this.battery = battery;
-        this.screenResolution = screenResolution;
         this.operaSystem = operaSystem;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public int getBattery() {
+        return battery;
+    }
+
+    public void setBattery(int battery) {
+        this.battery = battery;
+    }
+
+    public String getScreenResolution() {
+        return screenResolution;
+    }
+
+    public void setScreenResolution(String screenResolution) {
+        this.screenResolution = screenResolution;
+    }
+
+    public PhoneSpecification() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public double getSizeScreen() {
@@ -85,22 +140,6 @@ public class SpecificationDTO {
         this.rom = rom;
     }
 
-    public int getBattery() {
-        return battery;
-    }
-
-    public void setBattery(int battery) {
-        this.battery = battery;
-    }
-
-    public String getScreenResolution() {
-        return screenResolution;
-    }
-
-    public void setScreenResolution(String screenResolution) {
-        this.screenResolution = screenResolution;
-    }
-
     public String getOperaSystem() {
         return operaSystem;
     }
@@ -108,4 +147,5 @@ public class SpecificationDTO {
     public void setOperaSystem(String operaSystem) {
         this.operaSystem = operaSystem;
     }
+
 }

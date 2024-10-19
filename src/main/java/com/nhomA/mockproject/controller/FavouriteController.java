@@ -1,6 +1,5 @@
 package com.nhomA.mockproject.controller;
 
-import com.nhomA.mockproject.exception.CategoryNotFoundException;
 import com.nhomA.mockproject.exception.ProductNotFoundException;
 import com.nhomA.mockproject.exception.UserNotFoundException;
 import com.nhomA.mockproject.service.FavouriteService;
@@ -22,7 +21,7 @@ public class FavouriteController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addFavourite(Authentication authentication, Long idProduct){
+    public ResponseEntity<?> addFavourite(Authentication authentication,Long idProduct){
         try {
             String username = authentication.getName();
             return new ResponseEntity<>(favouriteService.addFavourite(username,idProduct), HttpStatus.CREATED);
@@ -47,8 +46,8 @@ public class FavouriteController {
         }
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteFavourite(Authentication authentication, Long idProduct){
+    @DeleteMapping("/{idProduct}")
+    public ResponseEntity<?> deleteFavourite(Authentication authentication,@PathVariable Long idProduct){
         try {
             String username = authentication.getName();
             return new ResponseEntity<>(favouriteService.removeFavouriteById(username,idProduct), HttpStatus.OK);

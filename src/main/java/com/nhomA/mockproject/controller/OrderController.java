@@ -2,7 +2,9 @@ package com.nhomA.mockproject.controller;
 
 import com.nhomA.mockproject.dto.OrderPaymentVnPayDTO;
 import com.nhomA.mockproject.dto.OrderRequestDTO;
+import com.nhomA.mockproject.dto.UpdateStatusDTO;
 import com.nhomA.mockproject.exception.CartLineItemNotFoundException;
+import com.nhomA.mockproject.exception.OrderNotFoundException;
 import com.nhomA.mockproject.service.OrderService;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
@@ -94,9 +96,9 @@ public class OrderController {
         }
     }
     @PutMapping("/admin/order/update-status")
-    public ResponseEntity<?> setStatusOrder(@RequestParam("orderId") Long orderId, @RequestParam("statusOrderId") Long statusOrderId){
+    public ResponseEntity<?> setStatusOrder(@RequestBody UpdateStatusDTO updateStatusDTO){
         try{
-            return new ResponseEntity<> (orderService.setStatusOrder(orderId,statusOrderId), HttpStatus.OK);
+            return new ResponseEntity<> (orderService.setStatusOrder(updateStatusDTO.getOrderId(),updateStatusDTO.getStatusOrderName()), HttpStatus.OK);
         }
         catch (AuthenticationException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
@@ -133,8 +135,8 @@ public class OrderController {
         }
     }
 
-    @PutMapping("/user/cancel-order")
-    public ResponseEntity<?> cancelOrder(Authentication authentication,@RequestParam("id") Long id){
+    @PutMapping("/user/cancel-order/{id}")
+    public ResponseEntity<?> cancelOrder(Authentication authentication,@PathVariable("id") Long id){
         try {
             String username = authentication.getName();
             return new ResponseEntity<>(orderService.cancelOrder(id, username),HttpStatus.OK);
@@ -170,4 +172,26 @@ public class OrderController {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/user/detail-order/{id}")
+    public ResponseEntity<?> detailOrder(Authentication authentication,@PathVariable("id") Long id){
+        try {
+            String username = authentication.getName();
+            return new ResponseEntity<>(orderService.getDetailOrder(username, id),HttpStatus.OK);
+        }
+        catch (AuthenticationException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+        catch (ExpiredJwtException ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+        catch (AccessDeniedException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+        }catch (OrderNotFoundException ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        }catch (Exception ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

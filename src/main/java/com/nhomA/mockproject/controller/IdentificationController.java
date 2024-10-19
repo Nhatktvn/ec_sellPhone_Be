@@ -16,8 +16,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/api/identification")
-@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api")
 public class IdentificationController {
     private final IdentificationService identificationService;
     private final UploadFileService uploadFileService;
@@ -27,7 +26,7 @@ public class IdentificationController {
         this.uploadFileService = uploadFileService;
     }
 
-    @GetMapping
+    @GetMapping("/identification")
     public ResponseEntity<?> getIdentification(Authentication authentication)
     {
         String username = authentication.getName();
@@ -48,7 +47,7 @@ public class IdentificationController {
         }
     }
 
-    @PutMapping
+    @PutMapping("/identification")
     public ResponseEntity<?> updateIdentification(Authentication authentication, @RequestParam(value = "image", required = false) MultipartFile multipartFile,
                                                   @RequestParam("fullName") String fullName, @RequestParam("birthDate") LocalDate birthDate,
                                                   @RequestParam("phone") String phone, @RequestParam("email") String email

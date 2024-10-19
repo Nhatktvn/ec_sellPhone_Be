@@ -1,17 +1,37 @@
 package com.nhomA.mockproject.dto;
 
-public class CategoryDTO {
+public class BrandDTO {
     private Long id;
     private String name;
     private String description;
+    private String urlImage;
+    private Long categoryId;
 
-    public CategoryDTO() {
+
+    public BrandDTO() {
     }
 
-    public CategoryDTO(Long id, String name, String description) {
-        this.id = id;
+    public BrandDTO(String name, String description, String urlImage, Long categoryId) {
         this.name = name;
         this.description = description;
+        this.urlImage = urlImage;
+        this.categoryId = categoryId;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getUrlImage() {
+        return urlImage;
+    }
+
+    public void setUrlImage(String urlImage) {
+        this.urlImage = urlImage;
     }
 
     public Long getId() {

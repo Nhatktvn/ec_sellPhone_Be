@@ -1,21 +1,24 @@
 package com.nhomA.mockproject.mapper.impl;
 
+import com.nhomA.mockproject.dto.BrandDTO;
 import com.nhomA.mockproject.dto.CategoryDTO;
+import com.nhomA.mockproject.entity.Brand;
 import com.nhomA.mockproject.entity.Category;
+import com.nhomA.mockproject.mapper.BrandMapper;
 import com.nhomA.mockproject.mapper.CategoryMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-
 @Component
+
 public class CategoryMapperImpl implements CategoryMapper {
+
     @Override
     public Category toEntity(CategoryDTO categoryDTO) {
         Category category = new Category();
         category.setName(categoryDTO.getName());
         category.setDescription(categoryDTO.getDescription());
-        category.setUrlImage(categoryDTO.getUrlImage());
         return category;
     }
 
@@ -25,7 +28,6 @@ public class CategoryMapperImpl implements CategoryMapper {
         categoryDTO.setId(category.getId());
         categoryDTO.setName(category.getName());
         categoryDTO.setDescription(category.getDescription());
-        categoryDTO.setUrlImage(category.getUrlImage());
         return categoryDTO;
     }
 

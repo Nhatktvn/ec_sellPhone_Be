@@ -1,80 +1,28 @@
 package com.nhomA.mockproject.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.query.sql.internal.ParameterRecognizerImpl;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 
 @Entity
-@Table (name = "category")
+@Table(name = "category")
 public class Category {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "name", length = 100, nullable = false)
+
+    @Column(name = "name")
     private String name;
-    @Column(name = "url_image",nullable = false)
-    private String urlImage;
-    @Column(name = "description", nullable = false,length = -1)
+    @Column(name = "description")
     private String description;
-    @Column(name = "created_date")
-    private ZonedDateTime createdDate;
 
-    @Column(name = "updated_date")
-    private ZonedDateTime updatedDate;
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    private List<Brand> brands;
 
-    @ManyToOne
-    @JoinColumn(name = "user_created", referencedColumnName = "id")
-    private User userCreated;
-
-    @ManyToOne
-    @JoinColumn(name = "user_updated", referencedColumnName = "id")
-    private User userUpdated;
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<Product> products;
-
-
-    public ZonedDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(ZonedDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public ZonedDateTime getUpdatedDate() {
-        return updatedDate;
-    }
-
-    public void setUpdatedDate(ZonedDateTime updatedDate) {
-        this.updatedDate = updatedDate;
-    }
-
-    public User getUserCreated() {
-        return userCreated;
-    }
-
-    public void setUserCreated(User userCreated) {
-        this.userCreated = userCreated;
-    }
-
-    public User getUserUpdated() {
-        return userUpdated;
-    }
-
-    public void setUserUpdated(User userUpdated) {
-        this.userUpdated = userUpdated;
-    }
-
-    public String getUrlImage() {
-        return urlImage;
-    }
-
-    public void setUrlImage(String urlImage) {
-        this.urlImage = urlImage;
-    }
-
     public Long getId() {
         return id;
     }
@@ -99,11 +47,11 @@ public class Category {
         this.description = description;
     }
 
-    public List<Product> getProducts() {
-        return products;
+    public List<Brand> getBrands() {
+        return brands;
     }
 
-    public void setProducts(List<Product> products) {
-        this.products = products;
+    public void setBrands(List<Brand> brands) {
+        this.brands = brands;
     }
 }

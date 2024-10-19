@@ -51,10 +51,10 @@ public class User {
     private List<Product> updatedProducts;
 
     @OneToMany(mappedBy = "userCreated", cascade = CascadeType.ALL)
-    private List<Category> createdCategory;
+    private List<Brand> createdBrand;
 
     @OneToMany(mappedBy = "userUpdated", cascade = CascadeType.ALL)
-    private List<Category> updatedCategory;
+    private List<Brand> updatedBrand;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Address> addresses;
 
@@ -107,20 +107,20 @@ public class User {
         this.favourites = favourites;
     }
 
-    public List<Category> getCreatedCategory() {
-        return createdCategory;
+    public List<Brand> getCreatedCategory() {
+        return createdBrand;
     }
 
-    public void setCreatedCategory(List<Category> createdCategory) {
-        this.createdCategory = createdCategory;
+    public void setCreatedCategory(List<Brand> createdBrand) {
+        this.createdBrand = createdBrand;
     }
 
-    public List<Category> getUpdatedCategory() {
-        return updatedCategory;
+    public List<Brand> getUpdatedCategory() {
+        return updatedBrand;
     }
 
-    public void setUpdatedCategory(List<Category> updatedCategory) {
-        this.updatedCategory = updatedCategory;
+    public void setUpdatedCategory(List<Brand> updatedBrand) {
+        this.updatedBrand = updatedBrand;
     }
 
     public List<Product> getCreatedProducts() {

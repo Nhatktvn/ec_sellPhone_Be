@@ -1,9 +1,7 @@
 package com.nhomA.mockproject.repository;
 
-import com.nhomA.mockproject.entity.Product;
 import com.nhomA.mockproject.entity.Variant;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 

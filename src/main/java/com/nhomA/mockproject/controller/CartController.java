@@ -1,6 +1,8 @@
 package com.nhomA.mockproject.controller;
 
 import com.nhomA.mockproject.dto.AddCartDTO;
+import com.nhomA.mockproject.dto.UpdateQuantityCartItemDTO;
+import com.nhomA.mockproject.exception.AvailableProductException;
 import com.nhomA.mockproject.service.CartService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -35,6 +37,9 @@ public class CartController {
         catch (AccessDeniedException ex){
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
         }
+        catch (AvailableProductException ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
         catch (Exception ex){
             return new ResponseEntity<> (ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -59,26 +64,26 @@ public class CartController {
         }
     }
 
-//    @PutMapping("cart/set-quantity/{idProduct}")
-//    public ResponseEntity<?> deleteItem (Authentication authentication, @PathVariable("idProduct") Long idProduct,@RequestParam("quantity") int quantity){
-//        String username = authentication.getName();
-//        try{
-//            return new ResponseEntity<> (cartService.updateQuantityProduct(username,idProduct,quantity), HttpStatus.OK);
-//        }
-//        catch (AuthenticationException ex) {
-//            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
-//        }
-//        catch (ExpiredJwtException ex){
-//            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
-//        }
-//        catch (AccessDeniedException ex){
-//            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-//        }
-//        catch (Exception ex){
-//            return new ResponseEntity<> (ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-    @GetMapping("/user/get-cart")
+    @PutMapping("/cart/set-quantity")
+    public ResponseEntity<?> deleteItem (Authentication authentication, @RequestBody UpdateQuantityCartItemDTO updateQuantityCartItemDTO){
+        String username = authentication.getName();
+        try{
+            return new ResponseEntity<> (cartService.updateQuantityProduct(username,updateQuantityCartItemDTO.getIdCartItem(),updateQuantityCartItemDTO.getQuantity()), HttpStatus.OK);
+        }
+        catch (AuthenticationException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+        catch (ExpiredJwtException ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+        catch (AccessDeniedException ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+        }
+        catch (Exception ex){
+            return new ResponseEntity<> (ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @GetMapping("/cart/get-cart")
     public ResponseEntity<?> getCartLineItems (Authentication authentication ){
         String username = authentication.getName();
         try{

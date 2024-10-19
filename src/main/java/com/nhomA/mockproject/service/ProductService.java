@@ -19,5 +19,7 @@ public interface ProductService {
 
     ProductResponseDTO getProductByNameExact (String name);
 
-    List<String> getNameSearch (String keyName);
+    List<String> getNameSearch (int pageNo, int pageSize, String sortBy, String sortDir, String keyName);
+
+    List<ProductResponseDTO> suggestProductSearch (String keyName);
 }
