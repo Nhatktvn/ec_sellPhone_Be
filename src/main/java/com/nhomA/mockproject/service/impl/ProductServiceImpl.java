@@ -239,6 +239,13 @@ public class ProductServiceImpl implements ProductService {
         return productMapper.toResponseDTOs(products);
     }
 
+    @Override
+    public List<ProductResponseDTO> getProductsByListId(List<Long> ids) {
+        List<Product> products = productRepository.findByIdIn(ids);
+        List<ProductResponseDTO> productResponseDTOS = productMapper.toResponseDTOs(products);
+        return productResponseDTOS;
+    }
+
     public void saveSpecification (Long category_id, Product product, String specificationString) {
         Gson gson = new Gson();
         Optional<Category> category = categoryRepository.findById(category_id);

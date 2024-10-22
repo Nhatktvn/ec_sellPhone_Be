@@ -266,4 +266,14 @@ public class ProductController {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PostMapping("/product/by-ids")
+    public ResponseEntity<?> getProductsByIds(@RequestBody List<Long> ids) {
+        try {
+            return new ResponseEntity<>(productService.getProductsByListId(ids),HttpStatus.OK);
+        }
+        catch (Exception ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

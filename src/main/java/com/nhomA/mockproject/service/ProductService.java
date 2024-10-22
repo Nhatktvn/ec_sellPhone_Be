@@ -22,4 +22,5 @@ public interface ProductService {
     List<String> getNameSearch (int pageNo, int pageSize, String sortBy, String sortDir, String keyName);
 
     List<ProductResponseDTO> suggestProductSearch (String keyName);
+    List<ProductResponseDTO> getProductsByListId (List<Long> ids);
 }
