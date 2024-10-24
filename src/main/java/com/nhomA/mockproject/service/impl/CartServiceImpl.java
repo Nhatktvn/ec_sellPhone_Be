@@ -1,6 +1,9 @@
 package com.nhomA.mockproject.service.impl;
 
 import com.nhomA.mockproject.dto.CartLineItemResponseDTO;
+import com.nhomA.mockproject.dto.ProductOutStockDTO;
+import com.nhomA.mockproject.dto.VariantDTO;
+import com.nhomA.mockproject.dto.VariantRequestDTO;
 import com.nhomA.mockproject.entity.*;
 import com.nhomA.mockproject.exception.AvailableProductException;
 import com.nhomA.mockproject.exception.CartLineItemNotFoundException;
@@ -8,10 +11,12 @@ import com.nhomA.mockproject.exception.VariantProductNotFoundException;
 import com.nhomA.mockproject.mapper.CartLineItemMapper;
 import com.nhomA.mockproject.repository.*;
 import com.nhomA.mockproject.service.CartService;
+import com.nhomA.mockproject.service.VariantService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,14 +28,16 @@ public class CartServiceImpl implements CartService {
     private final CartLineItemRepository cartLineItemRepository;
     private final CartLineItemMapper cartLineItemMapper;
     private final VariantRepository variantRepository;
+    private final VariantService variantService;
 
-    public CartServiceImpl(UserRepository userRepository, CartRepository cartRepository, ProductRepository productRepository, CartLineItemRepository cartLineItemRepository, CartLineItemMapper cartLineItemMapper, VariantRepository variantRepository) {
+    public CartServiceImpl(UserRepository userRepository, CartRepository cartRepository, ProductRepository productRepository, CartLineItemRepository cartLineItemRepository, CartLineItemMapper cartLineItemMapper, VariantRepository variantRepository, VariantService variantService) {
         this.userRepository = userRepository;
         this.cartRepository = cartRepository;
         this.productRepository = productRepository;
         this.cartLineItemRepository = cartLineItemRepository;
         this.cartLineItemMapper = cartLineItemMapper;
         this.variantRepository = variantRepository;
+        this.variantService = variantService;
     }
 
     @Transactional
@@ -126,5 +133,19 @@ public class CartServiceImpl implements CartService {
         List<CartLineItem> cartLineItems = cartLineItemRepository.findByCartIdAndIsDeletedOrderById(cart.getId(), false);
         List<CartLineItemResponseDTO> cartLineItemResponseDTOS = cartLineItemMapper.toResponseDTOs(cartLineItems);
         return cartLineItemResponseDTOS;
+    }
+
+    @Override
+    public List<ProductOutStockDTO> checkAvailableOutStock(String username) {
+        List<ProductOutStockDTO> productOutStockDTOs = new ArrayList<>();
+        List<CartLineItemResponseDTO> getCartLineItemByUsername = getAllCartLineItemUsername(username);
+        for(CartLineItemResponseDTO c : getCartLineItemByUsername){
+            VariantDTO availableProduct = variantService.getAvailable(new VariantRequestDTO(c.getColor(),c.getStorageCapacity(),c.getProductId()));
+            if(availableProduct.getAvailable() < c.getQuantity()){
+                ProductOutStockDTO outStockDTO = new ProductOutStockDTO(c.getId(), availableProduct.getAvailable());
+                productOutStockDTOs.add(outStockDTO);
+            }
+        }
+        return productOutStockDTOs;
     }
 }
