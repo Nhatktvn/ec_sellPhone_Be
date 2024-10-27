@@ -267,6 +267,20 @@ public class ProductController {
         }
     }
 
+    @PostMapping("/product/filter")
+    public ResponseEntity<?> getProductsFilter(@RequestParam(value = "category", required = false) Long category,
+                                               @RequestParam(value = "brand", required = false) List<Long> brand,
+                                               @RequestParam(value = "search", required = false) String search,
+                                               @RequestParam(value = "minPrice", defaultValue = "0",required = false) double minPrice,
+                                               @RequestParam(value = "maxPrice", required = false) double maxPrice,
+                                               @RequestParam(value = "storage", required = false) String storage) {
+        try {
+            return new ResponseEntity<>(productService.getProductFilter(category,brand,search,minPrice,maxPrice,storage),HttpStatus.OK);
+        }
+        catch (Exception ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     @PostMapping("/product/by-ids")
     public ResponseEntity<?> getProductsByIds(@RequestBody List<Long> ids) {
         try {
@@ -276,4 +290,5 @@ public class ProductController {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

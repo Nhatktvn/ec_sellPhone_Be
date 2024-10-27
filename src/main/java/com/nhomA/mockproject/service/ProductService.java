@@ -23,4 +23,5 @@ public interface ProductService {
 
     List<ProductResponseDTO> suggestProductSearch (String keyName);
     List<ProductResponseDTO> getProductsByListId (List<Long> ids);
+    List <ProductResponseDTO> getProductFilter (Long category, List<Long> brand, String search, double minPrice, double maxPrice, String storage);
 }

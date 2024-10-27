@@ -56,7 +56,7 @@ public class CartServiceImpl implements CartService {
         }
         Variant variant = existedVariant.get();
         if(quantity > variant.getAvailable()){
-            throw  new AvailableProductException("Product quantity is not enough");
+            throw  new AvailableProductException("Số lượng sản phẩm không đủ");
         }
         Optional<CartLineItem> emptyCartLineItem = cartLineItemRepository.findByCartIdAndProductIdAndIsDeletedAndColorAndStorage(cart.getId(),idProduct,false,color,storage);
         //create new cart_line_item

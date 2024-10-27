@@ -246,6 +246,18 @@ public class ProductServiceImpl implements ProductService {
         return productResponseDTOS;
     }
 
+    @Override
+    public List<ProductResponseDTO> getProductFilter(Long category, List<Long> brand, String search, double minPrice, double maxPrice, String storage) {
+        if(brand == null){
+            List<Product> getProductFilter = productRepository.findByFiltersNoBrand(category,search, minPrice,maxPrice,storage);
+            List<ProductResponseDTO> productResponseDTOS = productMapper.toResponseDTOs(getProductFilter);
+            return productResponseDTOS;
+        }
+        List<Product> getProductFilter = productRepository.findByFilters(category,brand,search,minPrice,maxPrice,storage);
+        List<ProductResponseDTO> productResponseDTOS = productMapper.toResponseDTOs(getProductFilter);
+        return productResponseDTOS;
+    }
+
     public void saveSpecification (Long category_id, Product product, String specificationString) {
         Gson gson = new Gson();
         Optional<Category> category = categoryRepository.findById(category_id);
