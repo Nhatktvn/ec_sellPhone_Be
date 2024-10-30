@@ -3,6 +3,7 @@ package com.nhomA.mockproject.dto;
 import java.time.LocalDate;
 
 public class OrderRequestDTO {
+    private String codeOrder;
     private String provinceAddress;
     private String districtAddress;
     private String wardAddress;
@@ -14,7 +15,8 @@ public class OrderRequestDTO {
     public OrderRequestDTO() {
     }
 
-    public OrderRequestDTO(String provinceAddress, String districtAddress, String wardAddress, String streetAddress, String name, String phone, String noteOrder) {
+    public OrderRequestDTO(String codeOrder, String provinceAddress, String districtAddress, String wardAddress, String streetAddress, String name, String phone, String noteOrder) {
+        this.codeOrder = codeOrder;
         this.provinceAddress = provinceAddress;
         this.districtAddress = districtAddress;
         this.wardAddress = wardAddress;
@@ -22,6 +24,14 @@ public class OrderRequestDTO {
         this.name = name;
         this.phone = phone;
         this.noteOrder = noteOrder;
+    }
+
+    public String getCodeOrder() {
+        return codeOrder;
+    }
+
+    public void setCodeOrder(String codeOrder) {
+        this.codeOrder = codeOrder;
     }
 
     public String getProvinceAddress() {

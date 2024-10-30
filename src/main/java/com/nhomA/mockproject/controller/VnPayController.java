@@ -3,10 +3,13 @@ package com.nhomA.mockproject.controller;
 import com.nhomA.mockproject.config.VnPayConfig;
 import com.nhomA.mockproject.dto.OrderPaymentVnPayDTO;
 import com.nhomA.mockproject.dto.OrderRequestDTO;
+import com.nhomA.mockproject.dto.VariantRequestDTO;
 import com.nhomA.mockproject.service.OrderService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

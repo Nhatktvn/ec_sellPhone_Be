@@ -5,6 +5,7 @@ import java.util.List;
 
 public class OrderResponseDTO {
     private Long Id;
+    private String codeOrder;
     private String address;
     private String name;
     private String phone;
@@ -21,6 +22,14 @@ public class OrderResponseDTO {
 
     public void setId(Long id) {
         Id = id;
+    }
+
+    public String getCodeOrder() {
+        return codeOrder;
+    }
+
+    public void setCodeOrder(String codeOrder) {
+        this.codeOrder = codeOrder;
     }
 
     public VnPayResponseDTO getVnPayResponseDTO() {

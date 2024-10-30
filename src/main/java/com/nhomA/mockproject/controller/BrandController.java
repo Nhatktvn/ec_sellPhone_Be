@@ -1,19 +1,27 @@
 package com.nhomA.mockproject.controller;
 
+import com.google.api.client.json.Json;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 import com.nhomA.mockproject.dto.BrandDTO;
+import com.nhomA.mockproject.dto.VariantDTO;
 import com.nhomA.mockproject.exception.BrandNotFoundException;
 import com.nhomA.mockproject.service.BrandService;
 import com.nhomA.mockproject.service.UploadFileService;
 import io.jsonwebtoken.ExpiredJwtException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,9 +31,27 @@ public class BrandController {
     private final BrandService brandService;
     private final UploadFileService uploadFileService;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     public BrandController(BrandService brandService, UploadFileService uploadFileService) {
         this.brandService = brandService;
         this.uploadFileService = uploadFileService;
+    }
+    @GetMapping("/get-order-ghn")
+    public ResponseEntity<?> createOrder (){
+        String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/detail";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        headers.set("token", "b02b4d89-018f-11ef-a6e6-e60958111f48");
+        String requestBody = "{\"order_code\":\"LDC4LH\"}";
+        HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+        Gson gson = new Gson();
+        Type listType = new TypeToken<Object>() {}.getType();
+        Object responseJson = gson.fromJson(response.getBody(), listType) ;
+        return new ResponseEntity<>(responseJson,HttpStatus.OK);
     }
     @GetMapping("/brand/{id}")
     public ResponseEntity<?> getBrandById(@PathVariable Long id){

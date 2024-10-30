@@ -16,6 +16,8 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "code_order")
+    private String codeOrder;
     @Column(name = "address", nullable = false)
     private String address;
     @Column(name = "delivery_time")
@@ -121,5 +123,13 @@ public class Order {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getCodeOrder() {
+        return codeOrder;
+    }
+
+    public void setCodeOrder(String codeOrder) {
+        this.codeOrder = codeOrder;
     }
 }

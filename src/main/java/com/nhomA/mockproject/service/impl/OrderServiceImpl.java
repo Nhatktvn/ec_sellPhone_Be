@@ -69,6 +69,7 @@ public class OrderServiceImpl implements OrderService {
 //        }
 //        Address address = existedAddress.get();
         Order order = new Order();
+        order.setCodeOrder(orderRequestDTO.getCodeOrder());
         String infoAddress = orderRequestDTO.getProvinceAddress() + ", " + orderRequestDTO.getDistrictAddress() + ", " + orderRequestDTO.getWardAddress() + ", " + orderRequestDTO.getStreetAddress();
         order.setAddress(infoAddress);
         order.setName(orderRequestDTO.getName());

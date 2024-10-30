@@ -34,6 +34,7 @@ public class OrderMapperImpl implements OrderMapper {
         responseDTO.setTotalPrice(order.getTotalPrice());
         responseDTO.setDeliveryTime(order.getDeliveryTime());
         responseDTO.setStatusOrder(order.getStatusOrder().getName());
+        responseDTO.setCodeOrder(order.getCodeOrder());
         if (order.getVnPayInfo() != null){
             responseDTO.setVnPayResponseDTO(vnPayMapper.toDTO(order.getVnPayInfo()));
         }
