@@ -1,15 +1,20 @@
 package com.nhomA.mockproject.controller;
 
 import com.nhomA.mockproject.config.VnPayConfig;
+import com.nhomA.mockproject.dto.GHNRequestDTO;
+import com.nhomA.mockproject.dto.ItemGHNDTO;
 import com.nhomA.mockproject.dto.OrderPaymentVnPayDTO;
 import com.nhomA.mockproject.dto.OrderRequestDTO;
-import com.nhomA.mockproject.dto.VariantRequestDTO;
+import com.nhomA.mockproject.entity.Cart;
+import com.nhomA.mockproject.entity.CartLineItem;
+import com.nhomA.mockproject.entity.User;
+import com.nhomA.mockproject.exception.CartLineItemNotFoundException;
+import com.nhomA.mockproject.repository.CartLineItemRepository;
+import com.nhomA.mockproject.repository.UserRepository;
 import com.nhomA.mockproject.service.OrderService;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -23,18 +28,26 @@ import java.util.*;
 public class VnPayController {
     private final OrderService orderService;
 
-
+    private final GHNController ghnController;
     private OrderRequestDTO orderRequestDTO;
+    private GHNRequestDTO ghnRequestDTO;
+    private final UserRepository userRepository;
+    private final CartLineItemRepository cartLineItemRepository;
 
-    public VnPayController(OrderService orderService) {
+    public VnPayController(OrderService orderService, GHNController ghnController, UserRepository userRepository, CartLineItemRepository cartLineItemRepository) {
         this.orderService = orderService;
+        this.ghnController = ghnController;
+        this.userRepository = userRepository;
+        this.cartLineItemRepository = cartLineItemRepository;
     }
 
     @PostMapping("/pay")
     public String getPay(Authentication authentication ,@RequestParam("provinceAddress") String provinceAddress,@RequestParam("districtAddress") String districtAddress,
                          @RequestParam("wardAddress") String wardAddress, @RequestParam("name") String name, @RequestParam("phone") String phone,
-                         @RequestParam("streetAddress") String streetAddress,
-                         @RequestParam("totalPrice") double totalPrice ) throws UnsupportedEncodingException{
+                         @RequestParam("streetAddress") String streetAddress, @RequestParam("totalPrice") double totalPrice,
+                         @RequestParam("toWardCode") String toWardCode, @RequestParam("toDistrictId") int toDistrictId,
+                         @RequestParam("codAmount") Long codAmount, @RequestParam("pickStationId") int pickStationId,
+                         @RequestParam("serviceId") int serviceId, @RequestParam("serviceTypeId") int serviceTypeId) throws UnsupportedEncodingException{
         OrderRequestDTO orderRequestDTO1 = new OrderRequestDTO();
         orderRequestDTO1.setProvinceAddress(provinceAddress);
         orderRequestDTO1.setDistrictAddress(districtAddress);
@@ -43,7 +56,9 @@ public class VnPayController {
 //        orderRequestDTO.setAddress(address);
         orderRequestDTO1.setName(name);
         orderRequestDTO1.setPhone(phone);
+        GHNRequestDTO ghnRequestDTO1 = new GHNRequestDTO(name,phone,districtAddress,toWardCode,toDistrictId,serviceId,serviceTypeId,codAmount);
         this.orderRequestDTO = orderRequestDTO1;
+        this.ghnRequestDTO = ghnRequestDTO1;
         String username = authentication.getName();
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
@@ -140,7 +155,7 @@ public class VnPayController {
             queryParams.remove("infoUsername");
             queryParams.remove("infoName");
             queryParams.remove("infoPhone");
-            queryParams.remove("infoAddressId");
+            queryParams.remove("infoAddress");
 //
 
             List fieldNames = new ArrayList(queryParams.keySet());
@@ -170,6 +185,21 @@ public class VnPayController {
             String hashCode = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hashData.toString());
             if (hashCode.equals(vnp_SecureHash)) {
                 if ("00".equals(queryParams.get("vnp_ResponseCode"))) {
+                    Optional<User> emptyUser =  userRepository.findByUsername(username);
+                    User user = emptyUser.get();
+                    Cart cart = user.getCart();
+                    List<CartLineItem> cartLineItems = cartLineItemRepository.findByCartIdAndIsDeleted(cart.getId(), false);
+                    if(cartLineItems.isEmpty()){
+                        throw new CartLineItemNotFoundException("Cart line item not found!");
+                    }
+                    List<ItemGHNDTO> itemGHNDTOS = new ArrayList<>();
+                    for (CartLineItem c : cartLineItems){
+                        String name = c.getProduct().getName() + " " + c.getColor() + " " + c.getStorage();
+                        ItemGHNDTO itemGHNDTO = new ItemGHNDTO(name, c.getProduct().getId().toString(),c.getQuantity(), (long)c.getSellPrice());
+                        itemGHNDTOS.add(itemGHNDTO);
+                    }
+                    ghnRequestDTO.setItems(itemGHNDTOS);
+                    ghnController.createOrder(ghnRequestDTO);
                     OrderPaymentVnPayDTO orderPaymentVnPayDTO = new OrderPaymentVnPayDTO(infoAddress, orderRequestDTO.getName(), orderRequestDTO.getPhone(), vnp_Amount, vnp_BankCode, vnp_TransactionNo, vnp_OrderInfo, vnp_SecureHash, vnp_PayDate, vnp_TxnRef);
                     orderService.orderPaymentVnPay(username, orderPaymentVnPayDTO);
                     response.sendRedirect("http://localhost:3000/thanh-toan/thanh-cong");
