@@ -3,6 +3,7 @@ package com.nhomA.mockproject.dto;
 import java.time.LocalDate;
 
 public class IdentificationDTO {
+    private Long id;
     private String fullName;
     private LocalDate birthDate;
     private String phone;
@@ -26,6 +27,14 @@ public class IdentificationDTO {
         this.phone = phone;
         this.email = email;
         this.urlAvatar = urlAvatar;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFullName() {

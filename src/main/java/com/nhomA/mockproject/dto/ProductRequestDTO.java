@@ -7,7 +7,7 @@ public class ProductRequestDTO {
     private Long  brand_id;
     private Long category_id;
     private  String imageThumb;
-
+    private String imageSpec;
     private  List<String> imagesProduct;
     private String description;
     private List<VariantDTO> variantDTOList;
@@ -15,15 +15,24 @@ public class ProductRequestDTO {
     public ProductRequestDTO() {
     }
 
-    public ProductRequestDTO(String name, Long brand_id, Long category_id, String imageThumb, List<String> imagesProduct, String description, List<VariantDTO> variantDTOList, String specification) {
+    public ProductRequestDTO(String name, Long brand_id, Long category_id, String imageThumb,String imageSpec, List<String> imagesProduct, String description, List<VariantDTO> variantDTOList, String specification) {
         this.name = name;
         this.brand_id = brand_id;
         this.category_id = category_id;
         this.imageThumb = imageThumb;
+        this.imageSpec = imageSpec;
         this.imagesProduct = imagesProduct;
         this.description = description;
         this.variantDTOList = variantDTOList;
         this.specification = specification;
+    }
+
+    public String getImageSpec() {
+        return imageSpec;
+    }
+
+    public void setImageSpec(String imageSpec) {
+        this.imageSpec = imageSpec;
     }
 
     public Long getCategory_id() {

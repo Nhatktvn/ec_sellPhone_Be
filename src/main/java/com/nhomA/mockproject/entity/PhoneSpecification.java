@@ -9,6 +9,9 @@ public class PhoneSpecification {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "img_spec")
+    private String imgSpec;
     @Column(name = "size_screen")
     private double sizeScreen;
     @Column(name = "screen_technology")
@@ -37,8 +40,9 @@ public class PhoneSpecification {
 //    private Product product;
 
 
-    public PhoneSpecification(Long id, double sizeScreen, String screenTechnology, String cameraRear, String cameraFront, String chipset, String ram, String rom, String operaSystem) {
+    public PhoneSpecification(Long id,String imgSpec, double sizeScreen, String screenTechnology, String cameraRear, String cameraFront, String chipset, String ram, String rom, String operaSystem) {
         this.id = id;
+        this.imgSpec = imgSpec;
         this.sizeScreen = sizeScreen;
         this.screenTechnology = screenTechnology;
         this.cameraRear = cameraRear;
@@ -47,6 +51,14 @@ public class PhoneSpecification {
         this.ram = ram;
         this.rom = rom;
         this.operaSystem = operaSystem;
+    }
+
+    public String getImgSpec() {
+        return imgSpec;
+    }
+
+    public void setImgSpec(String imgSpec) {
+        this.imgSpec = imgSpec;
     }
 
     public Product getProduct() {

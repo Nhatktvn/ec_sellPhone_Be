@@ -67,6 +67,8 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Reviews> reviews;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<CouponUser> couponUsers;
     public ActiveAccount getActiveAccount() {
         return activeAccount;
     }
@@ -211,5 +213,27 @@ public class User {
         this.cart = cart;
     }
 
+    public List<Brand> getCreatedBrand() {
+        return createdBrand;
+    }
 
+    public void setCreatedBrand(List<Brand> createdBrand) {
+        this.createdBrand = createdBrand;
+    }
+
+    public List<Brand> getUpdatedBrand() {
+        return updatedBrand;
+    }
+
+    public void setUpdatedBrand(List<Brand> updatedBrand) {
+        this.updatedBrand = updatedBrand;
+    }
+
+    public List<CouponUser> getCouponUsers() {
+        return couponUsers;
+    }
+
+    public void setCouponUsers(List<CouponUser> couponUsers) {
+        this.couponUsers = couponUsers;
+    }
 }

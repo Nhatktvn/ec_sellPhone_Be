@@ -1,6 +1,7 @@
 package com.nhomA.mockproject.dto;
 
 public class PhoneSpecificationDTO extends SpecificationResponseDTO{
+    private String urlImageSpec;
     private double sizeScreen;
     private String screenTechnology;
     private String cameraRear;
@@ -14,7 +15,8 @@ public class PhoneSpecificationDTO extends SpecificationResponseDTO{
     public PhoneSpecificationDTO(){}
 
 
-    public PhoneSpecificationDTO(double sizeScreen, String screenTechnology, String cameraRear, String cameraFront, String chipset, String ram, String rom, int battery, String screenResolution, String operaSystem) {
+    public PhoneSpecificationDTO(String urlImageSpec, double sizeScreen, String screenTechnology, String cameraRear, String cameraFront, String chipset, String ram, String rom, int battery, String screenResolution, String operaSystem) {
+        this.urlImageSpec = urlImageSpec;
         this.sizeScreen = sizeScreen;
         this.screenTechnology = screenTechnology;
         this.cameraRear = cameraRear;
@@ -25,6 +27,14 @@ public class PhoneSpecificationDTO extends SpecificationResponseDTO{
         this.battery = battery;
         this.screenResolution = screenResolution;
         this.operaSystem = operaSystem;
+    }
+
+    public String getUrlImageSpec() {
+        return urlImageSpec;
+    }
+
+    public void setUrlImageSpec(String urlImageSpec) {
+        this.urlImageSpec = urlImageSpec;
     }
 
     public double getSizeScreen() {

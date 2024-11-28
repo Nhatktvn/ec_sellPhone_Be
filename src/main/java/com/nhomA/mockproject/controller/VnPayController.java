@@ -13,6 +13,7 @@ import com.nhomA.mockproject.repository.CartLineItemRepository;
 import com.nhomA.mockproject.repository.UserRepository;
 import com.nhomA.mockproject.service.OrderService;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +46,8 @@ public class VnPayController {
     public String getPay(Authentication authentication ,@RequestParam("provinceAddress") String provinceAddress,@RequestParam("districtAddress") String districtAddress,
                          @RequestParam("wardAddress") String wardAddress, @RequestParam("name") String name, @RequestParam("phone") String phone,
                          @RequestParam("streetAddress") String streetAddress, @RequestParam("totalPrice") double totalPrice,
+                         @RequestParam("couponId") Long couponId,
+                         @RequestParam("fee") int fee,
                          @RequestParam("toWardCode") String toWardCode, @RequestParam("toDistrictId") int toDistrictId,
                          @RequestParam("codAmount") Long codAmount, @RequestParam("pickStationId") int pickStationId,
                          @RequestParam("serviceId") int serviceId, @RequestParam("serviceTypeId") int serviceTypeId) throws UnsupportedEncodingException{
@@ -54,8 +57,10 @@ public class VnPayController {
         orderRequestDTO1.setWardAddress(wardAddress);
         orderRequestDTO1.setStreetAddress(streetAddress);
 //        orderRequestDTO.setAddress(address);
+        orderRequestDTO1.setFee(fee);
         orderRequestDTO1.setName(name);
         orderRequestDTO1.setPhone(phone);
+        orderRequestDTO1.setCouponId(couponId);
         GHNRequestDTO ghnRequestDTO1 = new GHNRequestDTO(name,phone,districtAddress,toWardCode,toDistrictId,serviceId,serviceTypeId,codAmount);
         this.orderRequestDTO = orderRequestDTO1;
         this.ghnRequestDTO = ghnRequestDTO1;
@@ -156,6 +161,7 @@ public class VnPayController {
             queryParams.remove("infoName");
             queryParams.remove("infoPhone");
             queryParams.remove("infoAddress");
+//            queryParams.remove("infoAddress");
 //
 
             List fieldNames = new ArrayList(queryParams.keySet());
@@ -199,9 +205,11 @@ public class VnPayController {
                         itemGHNDTOS.add(itemGHNDTO);
                     }
                     ghnRequestDTO.setItems(itemGHNDTOS);
-                    ghnController.createOrder(ghnRequestDTO);
-                    OrderPaymentVnPayDTO orderPaymentVnPayDTO = new OrderPaymentVnPayDTO(infoAddress, orderRequestDTO.getName(), orderRequestDTO.getPhone(), vnp_Amount, vnp_BankCode, vnp_TransactionNo, vnp_OrderInfo, vnp_SecureHash, vnp_PayDate, vnp_TxnRef);
-                    orderService.orderPaymentVnPay(username, orderPaymentVnPayDTO);
+                    ResponseEntity<?> responseGHN = ghnController.createOrder(ghnRequestDTO);
+                    String orderCode = responseGHN.getBody().toString();
+                    System.out.println(orderCode);
+                    OrderPaymentVnPayDTO orderPaymentVnPayDTO = new OrderPaymentVnPayDTO(infoAddress, orderRequestDTO.getName() , orderRequestDTO.getPhone(), orderRequestDTO.getCouponId(), orderRequestDTO.getFee(), vnp_Amount, vnp_BankCode, vnp_TransactionNo, vnp_OrderInfo, vnp_SecureHash, vnp_PayDate, vnp_TxnRef);
+                    orderService.orderPaymentVnPay(username,orderCode, orderPaymentVnPayDTO);
                     response.sendRedirect("http://localhost:3000/thanh-toan/thanh-cong");
                 } else {
                     response.sendRedirect("http://localhost:3000/thanh-toan/that-bai");

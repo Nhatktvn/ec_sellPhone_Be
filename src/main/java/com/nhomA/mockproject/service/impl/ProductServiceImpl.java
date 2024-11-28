@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -34,7 +35,8 @@ public class ProductServiceImpl implements ProductService {
     private final LaptopSpecificationMapper laptopSpecificationMapper;
     private final LaptopSpecificationRepository laptopSpecificationRepository;
     private final CategoryRepository categoryRepository;
-    public ProductServiceImpl(ProductRepository productRepository, UserRepository userRepository, ProductMapper productMapper, VariantMapper variantMapper, BrandRepository brandRepository, PhoneSpecificationMapper specificationMapper, PhoneSpecificationRepository phoneSpecificationRepository, LaptopSpecificationMapper laptopSpecificationMapper, LaptopSpecificationRepository laptopSpecificationRepository, CategoryRepository categoryRepository) {
+    private final RestTemplate restTemplate;
+    public ProductServiceImpl(ProductRepository productRepository, UserRepository userRepository, ProductMapper productMapper, VariantMapper variantMapper, BrandRepository brandRepository, PhoneSpecificationMapper specificationMapper, PhoneSpecificationRepository phoneSpecificationRepository, LaptopSpecificationMapper laptopSpecificationMapper, LaptopSpecificationRepository laptopSpecificationRepository, CategoryRepository categoryRepository, RestTemplate restTemplate) {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.productMapper = productMapper;
@@ -45,6 +47,7 @@ public class ProductServiceImpl implements ProductService {
         this.laptopSpecificationMapper = laptopSpecificationMapper;
         this.laptopSpecificationRepository = laptopSpecificationRepository;
         this.categoryRepository = categoryRepository;
+        this.restTemplate = restTemplate;
     }
 
     @Transactional
@@ -105,7 +108,7 @@ public class ProductServiceImpl implements ProductService {
             imagesProduct.setProduct(product);
             imagesProducts.add(imagesProduct);
         }
-        saveSpecification(productRequestDTO.getCategory_id(),product, productRequestDTO.getSpecification());
+        saveSpecification(productRequestDTO.getCategory_id(),product, productRequestDTO);
 //        Gson gson = new Gson();
 //        LaptopSpecificationDTO laptopSpecificationDTO = gson.fromJson(productRequestDTO.getSpecification(), LaptopSpecificationDTO.class);
 //        LaptopSpecification laptopSpecification = laptopSpecificationMapper.toEntity(laptopSpecificationDTO);
@@ -247,7 +250,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductResponseDTO> getProductFilter(Long category, List<Long> brand, String search, double minPrice, double maxPrice, String storage) {
+    public List<ProductResponseDTO> getProductFilter(Long category, List<String> brand, String search, double minPrice, double maxPrice, String storage) {
         if(brand == null){
             List<Product> getProductFilter = productRepository.findByFiltersNoBrand(category,search, minPrice,maxPrice,storage);
             List<ProductResponseDTO> productResponseDTOS = productMapper.toResponseDTOs(getProductFilter);
@@ -258,20 +261,34 @@ public class ProductServiceImpl implements ProductService {
         return productResponseDTOS;
     }
 
-    public void saveSpecification (Long category_id, Product product, String specificationString) {
+    @Override
+    public List<ProductResponseDTO> recommendProduct(String username) {
+        Optional<User> existedUser = userRepository.findByUsername(username);
+        String cartId = String.valueOf(existedUser.get().getCart().getId());
+        String url = "http://127.0.0.1:5000/recommend?user_id="+ cartId + "&num_recommendations=3";
+
+        RecommendationsDTO response = restTemplate.getForObject(url, RecommendationsDTO.class);
+        List<Product> products = productRepository.findByIdIn(response.getRecommendations());
+        List<ProductResponseDTO> productResponseDTOS = productMapper.toResponseDTOs(products);
+        return productResponseDTOS;
+    }
+
+    public void saveSpecification (Long category_id, Product product, ProductRequestDTO productRequestDTO) {
         Gson gson = new Gson();
         Optional<Category> category = categoryRepository.findById(category_id);
 //        SpecificationDTO specificationDTO = gson.fromJson(productRequestDTO.getSpecification(), SpecificationDTO.class);
         switch (category.get().getName().toLowerCase()) {
             case "điện thoại":
-                PhoneSpecificationDTO phoneSpecificationDTO = gson.fromJson(specificationString, PhoneSpecificationDTO.class);
+                PhoneSpecificationDTO phoneSpecificationDTO = gson.fromJson(productRequestDTO.getSpecification(), PhoneSpecificationDTO.class);
                 PhoneSpecification phoneSpecification = specificationMapper.toEntity(phoneSpecificationDTO);
+                phoneSpecification.setImgSpec(productRequestDTO.getImageSpec());
                 phoneSpecification.setProduct(product);
                 phoneSpecificationRepository.save(phoneSpecification);
                 return;
             case "laptop":
-                LaptopSpecificationDTO laptopSpecificationDTO = gson.fromJson(specificationString, LaptopSpecificationDTO.class);
+                LaptopSpecificationDTO laptopSpecificationDTO = gson.fromJson(productRequestDTO.getSpecification(), LaptopSpecificationDTO.class);
                 LaptopSpecification laptopSpecification = laptopSpecificationMapper.toEntity(laptopSpecificationDTO);
+                laptopSpecification.setImgSpec(productRequestDTO.getImageSpec());
                 laptopSpecification.setProduct(product);
                 laptopSpecificationRepository.save(laptopSpecification);
                 return;

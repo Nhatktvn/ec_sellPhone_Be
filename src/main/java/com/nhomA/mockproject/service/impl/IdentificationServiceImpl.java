@@ -27,6 +27,7 @@ public class IdentificationServiceImpl implements IdentificationService {
         Identification identification = user.getIdentification();
         identification.setEmail(user.getUsername());
         IdentificationDTO identificationDTO = identificationMapper.toDTO(identification);
+        identificationDTO.setId(user.getId());
         return identificationDTO;
     }
     @Transactional

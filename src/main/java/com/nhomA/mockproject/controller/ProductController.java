@@ -95,7 +95,7 @@ public class ProductController {
         }
     }
     @PostMapping("/admin/products")
-    public  ResponseEntity<?> createProduct(Authentication authentication,@RequestParam("imageThumb")MultipartFile imageThumb, @RequestParam("name") String name,
+    public  ResponseEntity<?> createProduct(Authentication authentication,@RequestParam("imageThumb")MultipartFile imageThumb,@RequestParam("imageSpec")MultipartFile imageSpec, @RequestParam("name") String name,
                                             @RequestParam("brand_id") Long brandId,
                                             @RequestParam("category_id") Long categoryId,
                                             @RequestParam("description") String description,
@@ -109,13 +109,14 @@ public class ProductController {
 //            LaptopSpecificationDTO laptopSpecificationDTO = gson.fromJson(specification, LaptopSpecificationDTO.class);
             List<String> listStringImages= new ArrayList<>();
             String  thumbImage = uploadFileService.uploadFile(imageThumb);
+            String  specImage = uploadFileService.uploadFile(imageSpec);
             for (MultipartFile file : imagesProduct) {
                 if (!file.isEmpty()) {
                     String  imageUrl = uploadFileService.uploadFile(file);
                     listStringImages.add(imageUrl);
                 }
             }
-            ProductRequestDTO productRequestDTO = new ProductRequestDTO(name,brandId,categoryId,thumbImage,listStringImages,description,variantDTOList,specification);
+            ProductRequestDTO productRequestDTO = new ProductRequestDTO(name,brandId,categoryId,thumbImage,specImage,listStringImages,description,variantDTOList,specification);
             return new ResponseEntity<>(productService.createProduct(username, productRequestDTO),HttpStatus.OK);
 //            return new ResponseEntity<>(laptopSpecificationDTO,HttpStatus.OK);
         }
@@ -137,7 +138,7 @@ public class ProductController {
     }
 
     @PostMapping("/admin/products-by-file")
-    public  ResponseEntity<?> createProductByFile(Authentication authentication, @RequestParam("imageThumb")MultipartFile imageThumb, @RequestParam("name") String name,
+    public  ResponseEntity<?> createProductByFile(Authentication authentication, @RequestParam("imageThumb")MultipartFile imageThumb, @RequestParam("imageSpec")MultipartFile imageSpec, @RequestParam("name") String name,
                                                   @RequestParam("brand_id") Long brandId,
                                                   @RequestParam("category_id") Long categoryId,
                                                    @RequestParam("description") String description,
@@ -151,13 +152,14 @@ public class ProductController {
 //            PhoneSpecificationDTO phoneSpecificationDTO = gson.fromJson(specification, PhoneSpecificationDTO.class);
             List<String> listStringImages= new ArrayList<>();
             String  thumbImage = uploadFileService.uploadFile(imageThumb);
+            String  imgSpec = uploadFileService.uploadFile(imageSpec);
             for (MultipartFile file : imagesProduct) {
                 if (!file.isEmpty()) {
                     String  imageUrl = uploadFileService.uploadFile(file);
                     listStringImages.add(imageUrl);
                 }
             }
-            ProductRequestDTO productRequestDTO = new ProductRequestDTO(name,brandId,categoryId,thumbImage,listStringImages,description,variantDTOList, specification);
+            ProductRequestDTO productRequestDTO = new ProductRequestDTO(name,brandId,categoryId,thumbImage,imgSpec,listStringImages,description,variantDTOList, specification);
             return new ResponseEntity<>(productService.createProduct(username, productRequestDTO),HttpStatus.OK);
         }
         catch (AuthenticationException ex) {
@@ -178,7 +180,7 @@ public class ProductController {
     }
 
     @PutMapping("/admin/products/{id}")
-    public ResponseEntity<?> updateProduct (Authentication authentication,@PathVariable Long id, @RequestParam(value = "imageThumb", required = false)MultipartFile imageThumb, @RequestParam("name") String name,
+    public ResponseEntity<?> updateProduct (Authentication authentication,@PathVariable Long id, @RequestParam(value = "imageThumb", required = false)MultipartFile imageThumb, @RequestParam(value = "imageSpec", required = false)MultipartFile imageSpec, @RequestParam("name") String name,
                                             @RequestParam("brand_id") Long brandId,
                                             @RequestParam("category_id") Long categoryId,
                                             @RequestParam("description") String description,
@@ -189,7 +191,10 @@ public class ProductController {
             if(imageThumb != null){
                 thumbImage = uploadFileService.uploadFile(imageThumb);
             }
-
+            String specImage = "";
+            if(imageSpec != null){
+                specImage = uploadFileService.uploadFile(imageSpec);
+            }
             List<String> listStringImages= new ArrayList<>();
             if (imagesProduct != null){
                 for (MultipartFile file : imagesProduct) {
@@ -203,7 +208,7 @@ public class ProductController {
             Type listType = new TypeToken<List<VariantDTO>>() {}.getType();
             List<VariantDTO> variantDTOList = gson.fromJson(variantDTOs, listType) ;
 //            PhoneSpecificationDTO phoneSpecificationDTO = gson.fromJson(specification, PhoneSpecificationDTO.class);
-            ProductRequestDTO productRequestDTO = new ProductRequestDTO(name,brandId,categoryId,thumbImage,listStringImages,description,variantDTOList, specification);
+            ProductRequestDTO productRequestDTO = new ProductRequestDTO(name,brandId,categoryId,thumbImage,specImage,listStringImages,description,variantDTOList, specification);
             return new ResponseEntity<>(productService.updateProductById(username,id, productRequestDTO),HttpStatus.OK);
         }
         catch (AuthenticationException ex) {
@@ -269,7 +274,7 @@ public class ProductController {
 
     @PostMapping("/product/filter")
     public ResponseEntity<?> getProductsFilter(@RequestParam(value = "category", required = false) Long category,
-                                               @RequestParam(value = "brand", required = false) List<Long> brand,
+                                               @RequestParam(value = "brand", required = false) List<String> brand,
                                                @RequestParam(value = "search", required = false) String search,
                                                @RequestParam(value = "minPrice", defaultValue = "0",required = false) double minPrice,
                                                @RequestParam(value = "maxPrice", required = false) double maxPrice,
@@ -285,6 +290,17 @@ public class ProductController {
     public ResponseEntity<?> getProductsByIds(@RequestBody List<Long> ids) {
         try {
             return new ResponseEntity<>(productService.getProductsByListId(ids),HttpStatus.OK);
+        }
+        catch (Exception ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/products/recommend")
+    public ResponseEntity<?> recommendProducts(Authentication authentication) {
+        try {
+            String username = authentication.getName();
+            return new ResponseEntity<>(productService.recommendProduct(username) ,HttpStatus.OK);
         }
         catch (Exception ex){
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

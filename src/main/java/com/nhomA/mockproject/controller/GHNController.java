@@ -1,14 +1,12 @@
 package com.nhomA.mockproject.controller;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.nhomA.mockproject.dto.DataOrderGHNDTO;
 import com.nhomA.mockproject.dto.GHNRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-
-import java.lang.reflect.Type;
 
 @RestController
 @RequestMapping("/api")
@@ -17,7 +15,8 @@ public class GHNController {
     private RestTemplate restTemplate;
 
     @PostMapping("/create-order-ghn")
-    public ResponseEntity<?> createOrder (@RequestBody GHNRequestDTO ghnRequestDTO){
+    public ResponseEntity<?> createOrder (@RequestBody GHNRequestDTO ghnRequestDTO) {
+        try {
         String url = "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
@@ -40,31 +39,36 @@ public class GHNController {
                 "                                    \"return_district_id\": null,\n" +
                 "                                    \"return_ward_code\": \"\",\n" +
                 "                                    \"client_order_code\": \"\",\n" +
-                "                                    \"to_name\": \""+ghnRequestDTO.getToName()+"\",\n" +
-                "                                    \"to_phone\": \""+ghnRequestDTO.getToPhone()+"\",\n" +
-                "                                    \"to_address\": \""+ghnRequestDTO.getToAddress()+"\",\n" +
-                "                                    \"to_ward_code\": \""+ghnRequestDTO.getToWardCode()+"\",\n" +
-                "                                    \"to_district_id\": "+ghnRequestDTO.getToDistrictId()+",\n" +
+                "                                    \"to_name\": \"" + ghnRequestDTO.getToName() + "\",\n" +
+                "                                    \"to_phone\": \"" + ghnRequestDTO.getToPhone() + "\",\n" +
+                "                                    \"to_address\": \"" + ghnRequestDTO.getToAddress() + "\",\n" +
+                "                                    \"to_ward_code\": \"" + ghnRequestDTO.getToWardCode() + "\",\n" +
+                "                                    \"to_district_id\": " + ghnRequestDTO.getToDistrictId() + ",\n" +
                 "                                    \"cod_amount\": 0,\n" +
                 "                                    \"content\": \"Theo New York Times\",\n" +
                 "                                    \"weight\": 1000,\n" +
                 "                                    \"length\": 20,\n" +
                 "                                    \"width\": 20,\n" +
                 "                                    \"height\": 50,\n" +
-                "                                    \"pick_station_id\": "+ghnRequestDTO.getToDistrictId()+",\n" +
+                "                                    \"pick_station_id\": " + ghnRequestDTO.getToDistrictId() + ",\n" +
                 "                                    \"deliver_station_id\": null,\n" +
                 "                                    \"insurance_value\": 0,\n" +
-                "                                    \"service_id\": "+ghnRequestDTO.getServiceId()+",\n" +
-                "                                    \"service_type_id\": "+ghnRequestDTO.getServiceTypeId()+",\n" +
+                "                                    \"service_id\": " + ghnRequestDTO.getServiceId() + ",\n" +
+                "                                    \"service_type_id\": " + ghnRequestDTO.getServiceTypeId() + ",\n" +
                 "                                    \"coupon\":null,\n" +
                 "                                    \"pick_shift\":[2],\n" +
-                "                                    \"items\": "+jsonItem+"\n" +
+                "                                    \"items\": " + jsonItem + "\n" +
                 "                                }";
         HttpEntity<String> request = new HttpEntity<>(stringData, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
-        Type listType = new TypeToken<Object>() {}.getType();
-        Object responseJson = gson.fromJson(response.getBody(), listType) ;
-        return new ResponseEntity<>(stringData, HttpStatus.OK);
+        ResponseEntity<DataOrderGHNDTO> response = restTemplate.exchange(url, HttpMethod.POST, request, DataOrderGHNDTO.class);
+//        Type listType = new TypeToken<Object>() {}.getType();
+//        Object responseJson = gson.fromJson(response.getBody(), listType) ;
+//        CodeOrderGHNDTO codeOrderGHNDTO = (CodeOrderGHNDTO) responseJson;
+            return new ResponseEntity<>(response.getBody().getData().getCodeOrder(), HttpStatus.OK);
+    }
+    catch (Exception ex){
+        return new ResponseEntity<> (ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
     }
 }

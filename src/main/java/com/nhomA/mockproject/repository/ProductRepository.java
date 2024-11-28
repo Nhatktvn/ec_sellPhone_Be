@@ -27,13 +27,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 //            "AND (:maxPrice IS NULL OR v.sell_price <= :maxPrice) " +
 //            "AND (:storage IS NULL OR v.storage_capacity = :storageCapacity)")
     @Query("SELECT p FROM Product p JOIN p.variants v JOIN p.category c JOIN p.brand b  WHERE (:category IS NULL OR c.id = :category) " +
-            "AND (b.id IN :brand) " +
+            "AND (LOWER(b.name) IN :brand) " +
             "AND (:search IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :search, '%')))" +
             "AND (:minPrice IS NULL OR v.sellPrice >= :minPrice) " +
             "AND (:maxPrice IS NULL OR v.sellPrice <= :maxPrice) " +
             "AND (:storage IS NULL OR v.storageCapacity = :storage)")
     List<Product> findByFilters(@Param("category") Long category,
-                                @Param("brand") List<Long> brand,
+                                @Param("brand") List<String> brand,
                                 @Param("search") String search,
                                 @Param("minPrice") double minPrice,
                                 @Param("maxPrice") double maxPrice,

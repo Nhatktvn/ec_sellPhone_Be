@@ -10,6 +10,8 @@ public class LaptopSpecification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "img_spec")
+    private String imgSpec;
     @Column(name = "screen")
     private String screen;
     @Column(name = "cpu")
@@ -37,8 +39,9 @@ public class LaptopSpecification {
     public LaptopSpecification() {
     }
 
-    public LaptopSpecification(Long id, String screen, String cpu, String gpu, String ram, String rom, String battery, String operaSystem, String weight, String ports, String additionalFeatures, Product product) {
+    public LaptopSpecification(Long id,String imgSpec, String screen, String cpu, String gpu, String ram, String rom, String battery, String operaSystem, String weight, String ports, String additionalFeatures, Product product) {
         this.id = id;
+        this.imgSpec = imgSpec;
         this.screen = screen;
         this.cpu = cpu;
         this.gpu = gpu;
@@ -50,6 +53,14 @@ public class LaptopSpecification {
         this.ports = ports;
         this.additionalFeatures = additionalFeatures;
         this.product = product;
+    }
+
+    public String getImgSpec() {
+        return imgSpec;
+    }
+
+    public void setImgSpec(String imgSpec) {
+        this.imgSpec = imgSpec;
     }
 
     public Long getId() {

@@ -54,7 +54,8 @@ public class OrderController {
     public ResponseEntity<?> orderPaymentVnPay (Authentication authentication, @RequestBody OrderPaymentVnPayDTO paymentVnPayDTO){
         String username = authentication.getName();
         try{
-            return new ResponseEntity<> (orderService.orderPaymentVnPay(username,paymentVnPayDTO), HttpStatus.CREATED);
+//            return new ResponseEntity<> (orderService.orderPaymentVnPay(username,paymentVnPayDTO), HttpStatus.CREATED);
+            return new ResponseEntity<> ("orderService.orderPaymentVnPay(username,paymentVnPayDTO)", HttpStatus.CREATED);
         }
         catch (AuthenticationException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
@@ -95,7 +96,7 @@ public class OrderController {
             return new ResponseEntity<> (ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    @PutMapping("/admin/order/update-status")
+    @PutMapping("/order/update-status")
     public ResponseEntity<?> setStatusOrder(@RequestBody UpdateStatusDTO updateStatusDTO){
         try{
             return new ResponseEntity<> (orderService.setStatusOrder(updateStatusDTO.getOrderId(),updateStatusDTO.getStatusOrderName()), HttpStatus.OK);
@@ -178,6 +179,27 @@ public class OrderController {
         try {
             String username = authentication.getName();
             return new ResponseEntity<>(orderService.getDetailOrder(username, id),HttpStatus.OK);
+        }
+        catch (AuthenticationException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+        catch (ExpiredJwtException ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        }
+        catch (AccessDeniedException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
+        }catch (OrderNotFoundException ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+        }catch (Exception ex){
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/user/detail-order-code/{id}")
+    public ResponseEntity<?> detailOrderByCodeOrder(Authentication authentication,@PathVariable("id") String id){
+        try {
+            String username = authentication.getName();
+            return new ResponseEntity<>(orderService.getDetailOrderByCodeOrder(username, id),HttpStatus.OK);
         }
         catch (AuthenticationException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);

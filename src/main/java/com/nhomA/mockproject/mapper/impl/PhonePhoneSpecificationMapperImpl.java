@@ -36,6 +36,7 @@ public class PhonePhoneSpecificationMapperImpl implements PhoneSpecificationMapp
         phoneSpecificationDTO.setBattery(phoneSpecification.getBattery());
         phoneSpecificationDTO.setScreenResolution(phoneSpecification.getScreenResolution());
         phoneSpecificationDTO.setOperaSystem(phoneSpecification.getOperaSystem());
+        phoneSpecificationDTO.setUrlImageSpec(phoneSpecification.getImgSpec());
         return phoneSpecificationDTO;
     }
 }

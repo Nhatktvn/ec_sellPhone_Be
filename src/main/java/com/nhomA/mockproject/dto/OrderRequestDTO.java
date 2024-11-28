@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 public class OrderRequestDTO {
     private String codeOrder;
+    private int fee;
     private String provinceAddress;
     private String districtAddress;
     private String wardAddress;
@@ -11,11 +12,21 @@ public class OrderRequestDTO {
     private String name;
     private String phone;
     private String noteOrder;
+    private Long couponId;
+
 
     public OrderRequestDTO() {
     }
 
-    public OrderRequestDTO(String codeOrder, String provinceAddress, String districtAddress, String wardAddress, String streetAddress, String name, String phone, String noteOrder) {
+    public int getFee() {
+        return fee;
+    }
+
+    public void setFee(int fee) {
+        this.fee = fee;
+    }
+
+    public OrderRequestDTO(String codeOrder, String provinceAddress, String districtAddress, String wardAddress, String streetAddress, String name, String phone, String noteOrder, Long couponId) {
         this.codeOrder = codeOrder;
         this.provinceAddress = provinceAddress;
         this.districtAddress = districtAddress;
@@ -24,6 +35,15 @@ public class OrderRequestDTO {
         this.name = name;
         this.phone = phone;
         this.noteOrder = noteOrder;
+        this.couponId = couponId;
+    }
+
+    public Long getCouponId() {
+        return couponId;
+    }
+
+    public void setCouponId(Long couponId) {
+        this.couponId = couponId;
     }
 
     public String getCodeOrder() {

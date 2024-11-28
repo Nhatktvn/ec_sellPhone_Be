@@ -9,6 +9,7 @@ import com.nhomA.mockproject.mapper.OrderMapper;
 import com.nhomA.mockproject.mapper.VnPayMapper;
 import com.nhomA.mockproject.repository.*;
 import com.nhomA.mockproject.service.OrderService;
+import com.nhomA.mockproject.service.SendEmailService;
 import com.nhomA.mockproject.util.PaginationAndSortingUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,8 +30,11 @@ public class OrderServiceImpl implements OrderService {
     private final StatusOrderRepository statusOrderRepository;
     private final VnPayMapper vnPayMapper;
     private final ProductRepository productRepository;
+    private final SendEmailService sendEmailService;
+    private final CouponRepository couponRepository;
+    private final CouponUserRepository couponUserRepository;
 
-    public OrderServiceImpl(AddressRepository addressRepository, UserRepository userRepository, CartLineItemRepository cartLineItemRepository, OrderRepository orderRepository, OrderMapper orderMapper, StatusOrderRepository statusOrderRepository, VnPayMapper vnPayMapper, ProductRepository productRepository) {
+    public OrderServiceImpl(AddressRepository addressRepository, UserRepository userRepository, CartLineItemRepository cartLineItemRepository, OrderRepository orderRepository, OrderMapper orderMapper, StatusOrderRepository statusOrderRepository, VnPayMapper vnPayMapper, ProductRepository productRepository, SendEmailService sendEmailService, CouponRepository couponRepository, CouponUserRepository couponUserRepository) {
         this.addressRepository = addressRepository;
         this.userRepository = userRepository;
         this.cartLineItemRepository = cartLineItemRepository;
@@ -39,23 +43,13 @@ public class OrderServiceImpl implements OrderService {
         this.statusOrderRepository = statusOrderRepository;
         this.vnPayMapper = vnPayMapper;
         this.productRepository = productRepository;
+        this.sendEmailService = sendEmailService;
+        this.couponRepository = couponRepository;
+        this.couponUserRepository = couponUserRepository;
     }
     @Transactional
     @Override
     public OrderResponseDTO order(String username, OrderRequestDTO orderRequestDTO) {
-//        List<CartLineItem> cartLineItems = cartLineItemRepository.findByCartId(cartId);
-//        Order order = new Order();
-//        order.setAddress(orderRequestDTO.getAddress());
-//        order.setName(orderRequestDTO.getName());
-//        order.setPhoneNumber(orderRequestDTO.getPhone());
-//        order.setDeliveryTime(ZonedDateTime.now());
-//        order.setCartLineItems(cartLineItems);
-//        double totalPriceOrder = 0;
-//        for (CartLineItem c: cartLineItems){
-//            totalPriceOrder += c.getTotalPrice();
-//        }
-//        order.setTotalPrice(totalPriceOrder);
-//        orderRepository.save(order);
         Optional<User> emptyUser =  userRepository.findByUsername(username);
         User user = emptyUser.get();
         Cart cart = user.getCart();
@@ -63,11 +57,6 @@ public class OrderServiceImpl implements OrderService {
         if(cartLineItems.isEmpty()){
             throw new CartLineItemNotFoundException("Cart line item not found!");
         }
-//        Optional<Address> existedAddress = addressRepository.findByIdAndUserId(orderRequestDTO.getAddressId(),user.getId());
-//        if(existedAddress.isEmpty()){
-//            throw new AddressNotFoundException("Address not found!");
-//        }
-//        Address address = existedAddress.get();
         Order order = new Order();
         order.setCodeOrder(orderRequestDTO.getCodeOrder());
         String infoAddress = orderRequestDTO.getProvinceAddress() + ", " + orderRequestDTO.getDistrictAddress() + ", " + orderRequestDTO.getWardAddress() + ", " + orderRequestDTO.getStreetAddress();
@@ -79,6 +68,26 @@ public class OrderServiceImpl implements OrderService {
         double totalPriceOrder = 0;
         for (CartLineItem c: cartLineItems){
             totalPriceOrder += c.getSellPrice() * c.getQuantity();
+        }
+        totalPriceOrder = totalPriceOrder + (double) orderRequestDTO.getFee();
+        Optional<Coupon> couponExisted = couponRepository.findById(orderRequestDTO.getCouponId());
+        if(couponExisted.isEmpty()){
+            throw new CouponException("Coupon không hợp lệ");
+        }
+        if(couponExisted.get().getMinimumAmount() > totalPriceOrder){
+            throw new CouponException("Số tiền thanh toán chưa đủ điều kiện");
+        }
+        Optional<CouponUser> couponUserExisted = couponUserRepository.findByCouponIdAndUserId(orderRequestDTO.getCouponId(),user.getId());
+        if(couponUserExisted.get().getUsed() == true){
+            throw new CouponException("Coupon đã được sử dụng");
+        }
+        CouponUser couponUser = couponUserExisted.get();
+        Coupon coupon = couponExisted.get();
+        if(coupon.getTypeCoupon() == "fixed"){
+            totalPriceOrder = totalPriceOrder - coupon.getCouponValue();
+        }else{
+            double priceDiscount = Math.round((totalPriceOrder * coupon.getCouponValue() / 100)/1000) * 1000;
+            totalPriceOrder = totalPriceOrder - priceDiscount;
         }
         order.setTotalPrice(totalPriceOrder);
         for (CartLineItem c: cartLineItems){
@@ -105,12 +114,14 @@ public class OrderServiceImpl implements OrderService {
             }
             productRepository.save(product);
         }
+        couponUser.setUsed(true);
+//        sendEmailService.sendEmail(username, "Xác nhận đơn hàng", "Cảm ơn bạn đã tin tưởng và mua hàng của chúng tôi. Vui lòng kiểm tra lại ơn hàng!");
         return orderMapper.toResponseDTO(order);
     }
     @Transactional
 
     @Override
-    public OrderResponseDTO orderPaymentVnPay(String username, OrderPaymentVnPayDTO paymentVnPayDTO) {
+    public OrderResponseDTO orderPaymentVnPay(String username, String codeOrder, OrderPaymentVnPayDTO paymentVnPayDTO) {
         Optional<User> emptyUser =  userRepository.findByUsername(username);
         User user = emptyUser.get();
         Cart cart = user.getCart();
@@ -124,6 +135,7 @@ public class OrderServiceImpl implements OrderService {
 //        }
 //        Address address = existedAddress.get();
         Order order = new Order();
+        order.setCodeOrder(codeOrder);
         order.setAddress(paymentVnPayDTO.getAddress());
         order.setName(paymentVnPayDTO.getName());
         order.setPhoneNumber(paymentVnPayDTO.getPhone());
@@ -134,6 +146,32 @@ public class OrderServiceImpl implements OrderService {
         for (CartLineItem c: cartLineItems){
             totalPriceOrder += c.getSellPrice() * c.getQuantity();
         }
+        totalPriceOrder = totalPriceOrder + (double)paymentVnPayDTO.getFee();
+        System.out.println(totalPriceOrder);
+        Optional<Coupon> couponExisted = couponRepository.findById(paymentVnPayDTO.getCouponId());
+        if(couponExisted.isEmpty()){
+            throw new CouponException("Coupon không hợp lệ");
+        }
+        if(couponExisted.get().getMinimumAmount() > totalPriceOrder){
+            throw new CouponException("Số tiền thanh toán chưa đủ điều kiện");
+        }
+        Optional<CouponUser> couponUserExisted = couponUserRepository.findByCouponIdAndUserId(paymentVnPayDTO.getCouponId(),user.getId());
+        if(couponUserExisted.get().getUsed() == true){
+            throw new CouponException("Coupon đã được sử dụng");
+        }
+        CouponUser couponUser = couponUserExisted.get();
+        Coupon coupon = couponExisted.get();
+        if(coupon.getTypeCoupon().equals("fixed")){
+            totalPriceOrder = totalPriceOrder - coupon.getCouponValue();
+            System.out.println("fixed");
+            System.out.println(totalPriceOrder);
+        }else{
+            System.out.println(" khac fixed");
+            double priceDiscount = Math.round((totalPriceOrder * coupon.getCouponValue() / 100)/1000) * 1000;
+            System.out.println(priceDiscount);
+            totalPriceOrder = totalPriceOrder - priceDiscount;
+        }
+        System.out.println(totalPriceOrder);
         order.setTotalPrice(totalPriceOrder);
         for (CartLineItem c: cartLineItems){
             c.setDeleted(true);
@@ -179,7 +217,7 @@ public class OrderServiceImpl implements OrderService {
         Pageable pageable= PaginationAndSortingUtils.getPageable(pageNo,pageSize,sortBy,sortDir);
         Page<Order> orders= orderRepository.findAll(pageable);
         List<Order> orderContent = orders.getContent();
-        List<Order> orderList = orderRepository.findAll();
+        List<Order> orderList = orderRepository.findAllByOrderByIdDesc();
         return orderMapper.toResponseDTOs(orderList);
     }
 
@@ -213,7 +251,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponseDTO getDetailOrder(String username, Long orderId) {
         Optional<User> existedUser = userRepository.findByUsername(username);
-        Optional<Order> existedOrder = orderRepository.findByIdAndUserId(orderId, existedUser.get().getId());
+        Optional<Order> existedOrder = orderRepository.findByIdAndUserIdOrderByIdDesc(orderId, existedUser.get().getId());
         if(existedOrder.isEmpty()){
             throw new OrderNotFoundException("Order not found!");
         }
@@ -221,11 +259,23 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.toResponseDTO(order);
     }
 
+    @Override
+    public OrderResponseDTO getDetailOrderByCodeOrder(String username, String codeOrder) {
+        Optional<User> existedUser = userRepository.findByUsername(username);
+        Optional<Order> existedOrder = orderRepository.findByCodeOrderAndUserId(codeOrder, existedUser.get().getId());
+        if(existedOrder.isEmpty()){
+            throw new OrderNotFoundException("Order not found!");
+        }
+        Order order = existedOrder.get();
+        return orderMapper.toResponseDTO(order);
+    }
+
+
     @Transactional
     @Override
     public boolean cancelOrder(Long idOrder, String username) {
         Optional<User> existedUser = userRepository.findByUsername(username);
-        Optional<Order> existedOrder = orderRepository.findByIdAndUserId(idOrder, existedUser.get().getId());
+        Optional<Order> existedOrder = orderRepository.findByIdAndUserIdOrderByIdDesc(idOrder, existedUser.get().getId());
         if(existedOrder.isEmpty()){
             throw new OrderNotFoundException("Order not found!");
         }
@@ -243,7 +293,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public boolean receivedProduct(Long idOrder, String username) {
         Optional<User> existedUser = userRepository.findByUsername(username);
-        Optional<Order> existedOrder = orderRepository.findByIdAndUserId(idOrder, existedUser.get().getId());
+        Optional<Order> existedOrder = orderRepository.findByIdAndUserIdOrderByIdDesc(idOrder, existedUser.get().getId());
         if(existedOrder.isEmpty()){
             throw new OrderNotFoundException("Order not found!");
         }

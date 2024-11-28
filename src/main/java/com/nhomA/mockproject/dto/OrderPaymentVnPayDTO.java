@@ -6,6 +6,9 @@ public class OrderPaymentVnPayDTO {
     private String address;
     private String name;
     private String phone;
+    private Long couponId;
+    private int fee;
+
     private String vnpAmount;
     private String vnpBankCode;
     private String vnpTransactionNo;
@@ -17,10 +20,12 @@ public class OrderPaymentVnPayDTO {
     public OrderPaymentVnPayDTO() {
     }
 
-    public OrderPaymentVnPayDTO(String address, String name, String phone, String vnpAmount, String vnpBankCode, String vnpTransactionNo, String vnpOrderInfo, String vnpSecureHash, String vnpPayDate, String vnpTxnRef) {
+    public OrderPaymentVnPayDTO(String address, String name, String phone, Long couponId, int fee, String vnpAmount, String vnpBankCode, String vnpTransactionNo, String vnpOrderInfo, String vnpSecureHash, String vnpPayDate, String vnpTxnRef) {
         this.address = address;
         this.name = name;
         this.phone = phone;
+        this.couponId = couponId;
+        this.fee = fee;
         this.vnpAmount = vnpAmount;
         this.vnpBankCode = vnpBankCode;
         this.vnpTransactionNo = vnpTransactionNo;
@@ -30,6 +35,22 @@ public class OrderPaymentVnPayDTO {
         this.vnpTxnRef = vnpTxnRef;
     }
 
+
+    public int getFee() {
+        return fee;
+    }
+
+    public void setFee(int fee) {
+        this.fee = fee;
+    }
+
+    public Long getCouponId() {
+        return couponId;
+    }
+
+    public void setCouponId(Long couponId) {
+        this.couponId = couponId;
+    }
 
     public String getAddress() {
         return address;
